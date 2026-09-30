@@ -1,0 +1,107 @@
+@model trabalhoav1.Models.Pedido
+
+@{
+    Layout = "_Layout";
+    var pedidos = ViewBag.Pedidos as IEnumerable<trabalhoav1.Models.Pedido>;
+    bool eEdicao = Model != null && Model.Id > 0;
+}
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning text-dark fw-bold">
+                @(eEdicao ? "Editar Pedido" : "Cadastrar Pedido")
+            </div>
+            <div class="card-body">
+                <form action="/Pedido/Salvar" method="post">
+                    <input type="hidden" name="Id" value="@(Model?.Id ?? 0)" />
+
+                    <div class="mb-3">
+                        <label class="form-label font-monospace small text-muted">Valor Total (R$)</label>
+                        <input type="number" step="0.01" name="ValorTotal" class="form-control" value="@(Model?.ValorTotal != 0 ? Model?.ValorTotal : "")" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-monospace small text-muted">Status</label>
+                        <input type="text" name="Status" class="form-control" value="@Model?.Status" placeholder="ex: Processando, Concluído" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label font-monospace small text-muted">Endereço de Entrega</label>
+                        <input type="text" name="EnderecoEntrega" class="form-control" value="@Model?.EnderecoEntrega" required />
+                    </div>
+
+                    @if (eEdicao)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label font-monospace small text-muted">Data do Pedido</label>
+                            <input type="datetime-local" name="DataPedido" class="form-control" value="@Model?.DataPedido.ToString("yyyy-MM-ddTHH:mm")" />
+                        </div>
+                    }
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning w-100 fw-bold">
+                            @(eEdicao ? "Atualizar" : "Cadastrar")
+                        </button>
+                        @if (eEdicao)
+                        {
+                            <a href="/Pedido" class="btn btn-outline-secondary">Cancelar</a>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white fw-bold">
+                Lista de Pedidos
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Data</th>
+                                <th>Valor Total</th>
+                                <th>Status</th>
+                                <th>Entrega</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    @if (pedidos != null && pedidos.Any())
+                    {
+                        foreach (var item in pedidos)
+                        {
+                            <tr>
+                                <td><span class="badge bg-secondary">#@item.Id</span></td>
+                                <small class="text-muted"><td>@item.DataPedido.ToString("g")</td></small>
+                                <td class="fw-bold">R$ @item.ValorTotal.ToString("N2")</td>
+                                <td><span class="badge bg-primary">@item.Status</span></td>
+                                <td>@item.EnderecoEntrega</td>
+                                <td class="text-center">
+                                    <a href="/Pedido/Index?editId=@item.Id" class="btn btn-sm btn-outline-warning me-1">Editar</a>
+                                    <form action="/Pedido/Excluir" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Deseja realmente excluir?')">Excluir</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Nenhum pedido cadastrado.</td>
+                            </tr>
+                    }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
